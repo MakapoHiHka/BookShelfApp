@@ -12,10 +12,4 @@ public class BookTestConnectionApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BookTestConnectionApplication.class, args);
 	}
-//	@Bean
-//	public CommandLineRunner demo(BookRepository repository) {
-//		return (args) -> {
-//
-//		};
-//	}
 }

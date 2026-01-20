@@ -5,6 +5,7 @@ import com.example.book_test_connection.dto.RegisterRequest;
 import com.example.book_test_connection.entity.ConfirmationToken;
 import com.example.book_test_connection.entity.User;
 import com.example.book_test_connection.exceptions.EmailAlreadyExistsException;
+import com.example.book_test_connection.exceptions.TokenException;
 import com.example.book_test_connection.exceptions.UsernameAlreadyExistsException;
 import com.example.book_test_connection.repository.ConfirmationTokenRepository;
 import com.example.book_test_connection.repository.UserRepository;
@@ -65,12 +66,12 @@ public class UserService {
     public void confirmEmail(String token) {
         Optional<ConfirmationToken> confirmationTokenOpt = tokenRepository.findByToken(token);
         if (confirmationTokenOpt.isEmpty()) {
-            throw new RuntimeException("Invalid confirmation token");
+            throw new TokenException("Invalid confirmation token");
         }
 
         ConfirmationToken confirmationToken = confirmationTokenOpt.get();
         if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Confirmation token has expired");
+            throw new TokenException("Confirmation token has expired");
         }
 
         User user = confirmationToken.getUser();

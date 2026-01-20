@@ -8,14 +8,38 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    // Пользователь не найден (можно использовать вместо BadCredentialsException)
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ex.getMessage());
     }
 
-    @ExceptionHandler(UsernameAlreadyExistsException.class)
-    public ResponseEntity<String> handleUsernameExists(UsernameAlreadyExistsException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    // Email уже занят
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
     }
-    // Можно добавить другие
+
+    // Ошибки подтверждения email (токен недействителен/просрочен)
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<String> handleTokenError(TokenException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
+    // Имя пользовтеля уже используется
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<String> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
+    // Попытка входа без подтверждения email
+    @ExceptionHandler(UserNotEnabledException.class)
+    public ResponseEntity<String> handleUserNotEnabled(UserNotEnabledException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
+                .body(ex.getMessage());
+    }
 }
