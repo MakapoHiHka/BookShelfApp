@@ -16,19 +16,20 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
-    //private final CaptchaService captchaService;
+    private final CaptchaService captchaService;
 
     public AuthController(UserService userService,
-                          AuthService authService
-                          ) { //CaptchaService captchaService
+                          AuthService authService,
+                          CaptchaService captchaService
+                          ) {
         this.userService = userService;
         this.authService = authService;
-        //this.captchaService = captchaService;
+        this.captchaService = captchaService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
-//        captchaService.verify(request.getCaptchaResponse());
+        captchaService.verify(request.getCaptchaResponse());
         userService.register(request);
         return ResponseEntity.ok("Check your email for confirmation link");
     }

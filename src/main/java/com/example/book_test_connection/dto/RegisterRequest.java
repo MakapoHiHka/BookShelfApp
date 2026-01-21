@@ -15,8 +15,8 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-//    @NotBlank(message = "Captcha response is required")
-//    private String captchaResponse;
+    @NotBlank(message = "Captcha response is required")
+    private String captchaResponse;
 
     // --- getters / setters ---
 
@@ -44,12 +44,12 @@ public class RegisterRequest {
         this.password = password;
     }
 
-//    public String getCaptchaResponse() {
-//        return captchaResponse;
-//    }
-//
-//    public void setCaptchaResponse(String captchaResponse) {
-//        this.captchaResponse = captchaResponse;
-//    }
+    public String getCaptchaResponse() {
+        return captchaResponse;
+    }
+
+    public void setCaptchaResponse(String captchaResponse) {
+        this.captchaResponse = captchaResponse;
+    }
 
 }
