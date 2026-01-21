@@ -2,6 +2,7 @@ package com.example.book_test_connection.service;
 
 import com.example.book_test_connection.dto.BookCreateRequest;
 import com.example.book_test_connection.entity.Book;
+import com.example.book_test_connection.exceptions.BookNotFoundException;
 import com.example.book_test_connection.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class BookService {
 
     public Book findBookById(Long id) {
         return bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
     }
 
     // Принимает DTO, а не сущность
@@ -33,7 +34,7 @@ public class BookService {
 
     public void deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {
-            throw new RuntimeException("Book not found with id: " + id);
+            throw new BookNotFoundException("Book not found with id: " + id);
         }
         bookRepository.deleteById(id);
     }
@@ -42,7 +43,7 @@ public class BookService {
     public Book updateBook(Long id, BookCreateRequest request) {
         // 1. Находим существующую книгу
         Book existingBook = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
 
         // 2. Обновляем поля
         existingBook.setName(request.getName());

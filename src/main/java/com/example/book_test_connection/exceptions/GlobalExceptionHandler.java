@@ -2,18 +2,20 @@ package com.example.book_test_connection.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Пользователь не найден (можно использовать вместо BadCredentialsException)
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+    //если пароль или почта неправильная
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleBadCredentials() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ex.getMessage());
+                .body("Invalid email or password");
     }
+
 
     // Email уже занят
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -39,6 +41,13 @@ public class GlobalExceptionHandler {
     // Попытка входа без подтверждения email
     @ExceptionHandler(UserNotEnabledException.class)
     public ResponseEntity<String> handleUserNotEnabled(UserNotEnabledException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
+                .body(ex.getMessage());
+    }
+
+    //книга не найдена
+    @ExceptionHandler(BookNotFoundException.class)
+    public ResponseEntity<String> handleBookNotFoundException(BookNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
                 .body(ex.getMessage());
     }
