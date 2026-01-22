@@ -14,6 +14,7 @@ public class Book {
     private String name;
     private String author;
     private String description;
+    private String filePath;
 
     protected Book() {}
 
@@ -42,4 +43,7 @@ public class Book {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getFilePath(){ return filePath; }
+    public void setFilePath(String filePath){ this.filePath = filePath; }
 }

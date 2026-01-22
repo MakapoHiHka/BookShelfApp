@@ -51,4 +51,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(UploadErrorException.class)
+    public ResponseEntity<String> handleUploadErrorException(UploadErrorException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
+                .body(ex.getMessage());
+    }
 }
