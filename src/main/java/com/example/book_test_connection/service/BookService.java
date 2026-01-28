@@ -2,9 +2,11 @@ package com.example.book_test_connection.service;
 
 import com.example.book_test_connection.dto.BookCreateRequest;
 import com.example.book_test_connection.entity.Book;
+import com.example.book_test_connection.entity.User;
 import com.example.book_test_connection.exceptions.BookNotFoundException;
 import com.example.book_test_connection.exceptions.UploadErrorException;
 import com.example.book_test_connection.repository.BookRepository;
+import com.example.book_test_connection.repository.UserRepository;
 import com.example.book_test_connection.utils.FileValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +27,17 @@ public class BookService {
     private static final Logger log = LoggerFactory.getLogger(BookService.class);
 
     private final BookRepository bookRepository;
+    private final HtmlConversionService htmlConversionService;
+    private final UserRepository userRepository;
 
     @Value("${app.upload.dir:./uploads/books}")
     private String uploadDir;
 
-    public BookService(BookRepository bookRepository) {
+
+    public BookService(BookRepository bookRepository, HtmlConversionService htmlConversionService, UserRepository userRepository) {
         this.bookRepository = bookRepository;
+        this.htmlConversionService = htmlConversionService;
+        this.userRepository = userRepository;
     }
 
     public List<Book> findAllBooks() {
@@ -63,6 +70,18 @@ public class BookService {
             } catch (IOException e) {
                 // Логируем ошибку, но не прерываем удаление из БД
                 log.warn("Не удалось удалить файл книги: {}", book.getFilePath(), e);
+            }
+        }
+        if (book.getHtmlPath() != null && !book.getHtmlPath().isBlank()) {
+            try {
+                Path filePath = Paths.get(book.getHtmlPath());
+                if (Files.exists(filePath)) {
+                    Files.delete(filePath);
+                    log.info("html книги удалён: {}", filePath);
+                }
+            } catch (IOException e) {
+                // Логируем ошибку, но не прерываем удаление из БД
+                log.warn("Не удалось удалить html файл книги: {}", book.getHtmlPath(), e);
             }
         }
         bookRepository.deleteById(id);
@@ -113,7 +132,11 @@ public class BookService {
             Book book = new Book(request.getName(), request.getAuthor(), request.getDescription());
             book.setFilePath(filePath.toString()); // или relative path: "./uploads/books/" + uniqueFilename
 
-            return bookRepository.save(book);
+            Book savedBook = bookRepository.save(book);
+
+            htmlConversionService.convertBookToHtml(savedBook.getId());
+
+            return savedBook;
 
         } catch (IOException e) {
             throw new UploadErrorException("Unable to save book, try again later...");
@@ -157,12 +180,22 @@ public class BookService {
 
             // Привязываем путь к книге
             book.setFilePath(targetPath.toString());
-            return bookRepository.save(book);
+
+            Book savedBook = bookRepository.save(book);
+
+            htmlConversionService.convertBookToHtml(savedBook.getId());
+
+            return savedBook;
 
         } catch (IOException e) {
             log.warn("Cant attach file to book with id " + id + " " + e.getMessage());
             throw new UploadErrorException("Не удалось сохранить файл");
 
         }
+    }
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(User::getId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + email));
     }
 }

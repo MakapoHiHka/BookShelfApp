@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Читалка — BookShelf</title>
+  <style>
+    body {
+      margin: 0;
+      background: #fafafa;
+      font-family: serif;
+    }
+    #reader-container {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .book-page {
+      display: none;
+    }
+    .book-page.active {
+      display: block;
+    }
+    #nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-size: 0.9rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<div id="reader-container"></div>
+<div id="nav">Страница <span id="currentPage">1</span></div>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const bookId = urlParams.get('bookId');
+  if (!bookId) {
+    alert('Не указан ID книги');
+    window.location.href = 'bookShelf/bookshelf.html';
+  }
+
+  const token = localStorage.getItem('jwtToken');
+  if (!token) {
+    window.location.href = 'bookShelf/login.html';
+  }
+
+  let totalPages = 1;
+  let currentPage = 1;
+
+  // Загружаем HTML-контент книги
+  fetch(`/bookShelf/api/books/${bookId}/content`, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Книга не найдена или доступ запрещён');
+    return res.text();
+  })
+  .then(html => {
+    document.getElementById('reader-container').innerHTML = html;
+    initReader();
+  })
+  .catch(err => {
+    document.getElementById('reader-container').innerHTML =
+      `<p style="padding:20px; color:red;">Ошибка: ${err.message}</p>`;
+  });
+
+  function initReader() {
+    const pages = document.querySelectorAll('.book-page');
+    totalPages = pages.length;
+
+    // Показываем первую страницу
+    showPage(1);
+
+    // Навигация стрелками
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') showPage(currentPage + 1);
+      if (e.key === 'ArrowLeft')  showPage(currentPage - 1);
+    });
+  }
+
+  function showPage(pageNum) {
+    if (pageNum < 1) pageNum = 1;
+    if (pageNum > totalPages) pageNum = totalPages;
+    if (pageNum === currentPage) return;
+
+    const pages = document.querySelectorAll('.book-page');
+    pages.forEach((el, i) => {
+      el.classList.toggle('active', i === pageNum - 1);
+    });
+
+    currentPage = pageNum;
+    document.getElementById('currentPage').textContent = currentPage;
+
+    // Отправляем прогресс
+    sendProgress(currentPage, totalPages);
+  }
+function sendProgress(page, total) {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                console.warn('No token found. User not authenticated.');
+                return;
+            }
+            fetch(`/bookShelf/api/books/${bookId}/progress`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    pageNumber: page
+                })
+            }).catch(err => console.warn('Progress send failedHUI:', err));
+        }
+</script>
+
+</body>
+</html>

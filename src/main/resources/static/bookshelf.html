@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Моя библиотека — BookShelf</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background: #f5f7fa;
+        }
+        h1 {
+          color: #1976d2;
+        }
+        .book {
+          background: white;
+          padding: 1rem;
+          margin-bottom: 1rem;
+          border-radius: 6px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+          cursor: pointer;
+        }
+        .book:hover {
+          background: #f0f7ff;
+        }
+        .book h3 { margin: 0; color: #333; }
+        .book p { margin: 0.3rem 0; color: #666; font-size: 0.9rem; }
+        #message {
+          margin: 1rem 0;
+          padding: 0.5rem;
+          border-radius: 4px;
+        }
+        .error { background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+
+<h1>Моя библиотека</h1>
+<div id="books"></div>
+<div id="message"></div>
+
+<script>
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      window.location.href = '/bookShelf/login.html';
+    }
+
+    async function loadBooks() {
+      try {
+        const res = await fetch('/bookShelf/api/books', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Не удалось загрузить книги');
+        const books = await res.json();
+        renderBooks(books);
+      } catch (err) {
+        showMessage('Ошибка: ' + err.message, 'error');
+      }
+    }
+
+    function renderBooks(books) {
+      const container = document.getElementById('books');
+      if (books.length === 0) {
+        container.innerHTML = '<p>У вас пока нет книг.</p>';
+        return;
+      }
+      container.innerHTML = books.map(book => `
+        <div class="book" onclick="openReader(${book.id})">
+          <h3>${escapeHtml(book.name)}</h3>
+          <p>Автор: ${escapeHtml(book.author || '—')}</p>
+          <p>${escapeHtml(book.description || '')}</p>
+        </div>
+      `).join('');
+    }
+
+    function openReader(bookId) {
+      window.location.href = `/bookShelf/reader.html?bookId=${bookId}`;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showMessage(text, type = '') {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.className = type;
+    }
+
+    // Загружаем книги при старте
+    loadBooks();
+</script>
+
+</body>
+</html>

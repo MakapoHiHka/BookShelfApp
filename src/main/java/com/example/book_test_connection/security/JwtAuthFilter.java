@@ -1,5 +1,3 @@
-// src/main/java/com/example/book_test_connection/security/JwtAuthFilter.java
-
 package com.example.book_test_connection.security;
 
 import com.example.book_test_connection.service.CustomUserDetailsService;
