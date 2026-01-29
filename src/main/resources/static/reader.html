@@ -72,36 +72,54 @@
       `<p style="padding:20px; color:red;">Ошибка: ${err.message}</p>`;
   });
 
-  function initReader() {
-    const pages = document.querySelectorAll('.book-page');
-    totalPages = pages.length;
+function initReader() {
+  const pages = document.querySelectorAll('.book-page');
+  totalPages = pages.length;
 
-    // Показываем первую страницу
-    showPage(1);
+  // Читаем желаемую страницу из URL
+  const urlParams = new URLSearchParams(window.location.search);
+  let requestedPage = parseInt(urlParams.get('page'), 10);
 
-    // Навигация стрелками
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight') showPage(currentPage + 1);
-      if (e.key === 'ArrowLeft')  showPage(currentPage - 1);
-    });
+  // Если page не задан или недопустим — стартуем с 1
+  if (isNaN(requestedPage) || requestedPage < 1 || requestedPage > totalPages) {
+    requestedPage = 1;
   }
 
-  function showPage(pageNum) {
-    if (pageNum < 1) pageNum = 1;
-    if (pageNum > totalPages) pageNum = totalPages;
-    if (pageNum === currentPage) return;
-
-    const pages = document.querySelectorAll('.book-page');
-    pages.forEach((el, i) => {
-      el.classList.toggle('active', i === pageNum - 1);
+  // чтобы первая страница успела прогрузиться
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      showPage(requestedPage);
     });
+  });
 
-    currentPage = pageNum;
-    document.getElementById('currentPage').textContent = currentPage;
+  // Навигация стрелками
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') showPage(currentPage + 1);
+    if (e.key === 'ArrowLeft')  showPage(currentPage - 1);
+  });
+}
 
-    // Отправляем прогресс
-    sendProgress(currentPage, totalPages);
-  }
+function showPage(pageNum) {
+  if (pageNum < 1) pageNum = 1;
+  if (pageNum > totalPages) pageNum = totalPages;
+  if (pageNum === currentPage) return;
+
+  const pages = document.querySelectorAll('.book-page');
+  pages.forEach((el, i) => {
+    el.classList.toggle('active', i === pageNum - 1);
+  });
+
+  currentPage = pageNum;
+  document.getElementById('currentPage').textContent = currentPage;
+
+  // 🔹 Обновляем URL без перезагрузки
+  const url = new URL(window.location);
+  url.searchParams.set('page', currentPage);
+  window.history.replaceState(null, '', url);
+
+  sendProgress(currentPage, totalPages);
+}
+
 function sendProgress(page, total) {
             const token = localStorage.getItem('jwtToken');
             if (!token) {

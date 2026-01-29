@@ -256,7 +256,6 @@
             });
 
             if (res.status === 404) {
-                // Прогресс еще не установлен
                 return { pageNumber: 0 };
             }
 
@@ -274,17 +273,17 @@
     async function renderBooks(books) {
         const container = document.getElementById('books');
 
-<!--        if (books.length === 0) {-->
-<!--            container.innerHTML = `-->
-<!--                <div class="no-books">-->
-<!--                    <p>У вас пока нет книг в библиотеке</p>-->
-<!--                    <a href="/bookShelf/add-book.html" class="add-book-btn">-->
-<!--                        Добавить первую книгу-->
-<!--                    </a>-->
-<!--                </div>-->
-<!--            `;-->
-<!--            return;-->
-<!--        }-->
+        if (books.length === 0) {
+            container.innerHTML = `
+                <div class="no-books">
+                    <p>У вас пока нет книг в библиотеке</p>
+                    <a href="/bookShelf/add-book.html" class="add-book-btn">
+                        Добавить первую книгу
+                    </a>
+                </div>
+            `;
+            return;
+        }
 
         // Загружаем прогресс для всех книг параллельно
         const progressPromises = books.map(book => getBookProgress(book.id));
@@ -292,31 +291,36 @@
 
         container.innerHTML = books.map((book, index) => {
             const progress = progresses[index];
-            const pageNumber = progress.pageNumber || 0;
+            const currentPage = progress.pageNumber || 0;
+            const totalPages = book.totalPage; // теперь берём из сущности книги
 
-            // Определяем общее количество страниц (предполагаем 150 слов на страницу)
-            // В реальном приложении это должно приходить с сервера
-            const totalPages = book.totalPages || 100;
-            const progressPercent = Math.min(100, Math.round((pageNumber / totalPages) * 100));
+            let progressSection = '';
 
-            return `
-                <div class="book" onclick="openReader(${book.id})">
-                    <h3>${escapeHtml(book.name)}</h3>
-                    <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
-                    <p class="description">${escapeHtml(book.description || 'Без описания')}</p>
+            // Отображаем прогресс только если totalPages задано и > 0
+            if (totalPages && totalPages > 0) {
+                const progressPercent = Math.min(100, Math.round((currentPage / totalPages) * 100));
+                const statusText = getProgressStatus(currentPage, totalPages);
 
+                progressSection = `
                     <div class="progress-container">
                         <div class="progress-header">
-                            <span>Прогресс: ${pageNumber} / ${totalPages} страниц</span>
+                            <span>Прогресс: ${currentPage} / ${totalPages}</span>
                             <span>${progressPercent}%</span>
                         </div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${progressPercent}%"></div>
                         </div>
-                        <div class="progress-text">
-                            ${getProgressStatus(pageNumber, totalPages)}
-                        </div>
+                        <div class="progress-text">${statusText}</div>
                     </div>
+                `;
+            }
+
+            return `
+                <div class="book" onclick="openReader(${book.id}, ${currentPage})">
+                    <h3>${escapeHtml(book.name)}</h3>
+                    <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
+                    <p class="description">${escapeHtml(book.description || 'Без описания')}</p>
+                    ${progressSection}
                 </div>
             `;
         }).join('');
@@ -324,14 +328,16 @@
 
     function getProgressStatus(currentPage, totalPages) {
         if (currentPage === 0) return 'Еще не начато';
-        if (currentPage === totalPages) return 'Завершено!';
+        if (currentPage >= totalPages) return 'Завершено!';
         if (currentPage < totalPages * 0.3) return 'Только начал читать';
         if (currentPage < totalPages * 0.7) return 'В процессе чтения';
         return 'Почти закончил';
     }
 
-    function openReader(bookId) {
-        window.location.href = `/bookShelf/reader.html?bookId=${bookId}`;
+    function openReader(bookId, page) {
+        // Если страница не указана или 0 — начинаем с 1
+        const targetPage = page > 0 ? page : 1;
+        window.location.href = `/bookShelf/reader.html?bookId=${bookId}&page=${targetPage}`;
     }
 
     function escapeHtml(text) {
@@ -349,14 +355,12 @@
         `;
         el.className = type;
 
-        // Автоматически скрываем сообщение через 5 секунд
         setTimeout(() => {
             el.className = '';
             el.innerHTML = '';
         }, 5000);
     }
 
-    // Загружаем книги при старте
     loadBooks();
 </script>
 </body>
