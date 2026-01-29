@@ -2,6 +2,7 @@ package com.example.book_test_connection.service;
 
 
 import com.example.book_test_connection.converters.BookToHtmlConverter;
+import com.example.book_test_connection.dto.ConvertationResult;
 import com.example.book_test_connection.entity.Book;
 import com.example.book_test_connection.repository.BookRepository;
 import org.slf4j.Logger;
@@ -73,7 +74,8 @@ public class HtmlConversionService {
             log.debug("Выбран конвертер {} для формата .{}", converter.getClass().getSimpleName(), extension);
 
             // 5. Выполнить конвертацию
-            String htmlContent = converter.convertToHtml(sourcePath);
+            ConvertationResult result = converter.convertToHtml(sourcePath, bookId);
+            String htmlContent = result.getHtml();
             log.debug("Конвертация завершена, длина HTML: {} символов", htmlContent.length());
 
             // 6. Сохранить HTML на диск
@@ -85,6 +87,7 @@ public class HtmlConversionService {
 
             // 7. Обновить книгу в БД
             book.setHtmlPath(htmlPath.toString());
+            book.setTotalPage(result.getTotalPages());
             bookRepository.save(book);
             log.info("Книга ID={} успешно обновлена с htmlPath", bookId);
 

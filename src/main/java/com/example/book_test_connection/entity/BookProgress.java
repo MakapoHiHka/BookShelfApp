@@ -21,6 +21,8 @@ public class BookProgress {
     @Column(name = "page_number")
     private Integer pageNumber;
 
+
+
     protected BookProgress(){};
 
     public BookProgress(long userId, long bookId, Integer pageNumber){
@@ -32,7 +34,6 @@ public class BookProgress {
     public Long getUserId() {
         return userId;
     }
-
     public void setUserId(Long userId) {
         this.userId = userId;
     }
@@ -40,7 +41,6 @@ public class BookProgress {
     public Long getBookId() {
         return bookId;
     }
-
     public void setBookId(Long bookId) {
         this.bookId = bookId;
     }
@@ -53,4 +53,5 @@ public class BookProgress {
     public void setPageNumber(Integer pageNumber) {
         this.pageNumber = pageNumber;
     }
+
 }

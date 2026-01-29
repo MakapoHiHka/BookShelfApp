@@ -2,98 +2,362 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Моя библиотека — BookShelf</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          background: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
         h1 {
-          color: #1976d2;
+            color: #1976d2;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .books-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
         .book {
-          background: white;
-          padding: 1rem;
-          margin-bottom: 1rem;
-          border-radius: 6px;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-          cursor: pointer;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+
+        .book::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
         .book:hover {
-          background: #f0f7ff;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            background: #f8f9ff;
         }
-        .book h3 { margin: 0; color: #333; }
-        .book p { margin: 0.3rem 0; color: #666; font-size: 0.9rem; }
+
+        .book:hover::before {
+            opacity: 1;
+        }
+
+        .book h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .book p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .author {
+            color: #1976d2;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #999;
+            text-align: center;
+        }
+
+        .no-books {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-books p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .add-book-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .add-book-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
         #message {
-          margin: 1rem 0;
-          padding: 0.5rem;
-          border-radius: 4px;
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .error { background: #ffebee; color: #c62828; }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .books-container {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .book {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
+<div class="container">
+    <header>
+        <h1>Моя библиотека</h1>
+        <p class="subtitle">Ваши книги и прогресс чтения</p>
+    </header>
 
-<h1>Моя библиотека</h1>
-<div id="books"></div>
-<div id="message"></div>
+    <div id="message"></div>
+    <div id="books" class="books-container">
+        <div class="loading">Загрузка книг...</div>
+    </div>
+</div>
 
 <script>
     const token = localStorage.getItem('jwtToken');
     if (!token) {
-      window.location.href = '/bookShelf/login.html';
+        window.location.href = '/bookShelf/login.html';
     }
 
     async function loadBooks() {
-      try {
-        const res = await fetch('/bookShelf/api/books', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (!res.ok) throw new Error('Не удалось загрузить книги');
-        const books = await res.json();
-        renderBooks(books);
-      } catch (err) {
-        showMessage('Ошибка: ' + err.message, 'error');
-      }
+        try {
+            const res = await fetch('/bookShelf/api/books', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!res.ok) {
+                throw new Error('Не удалось загрузить книги');
+            }
+
+            const books = await res.json();
+            renderBooks(books);
+        } catch (err) {
+            showMessage('Ошибка: ' + err.message, 'error');
+        }
     }
 
-    function renderBooks(books) {
-      const container = document.getElementById('books');
-      if (books.length === 0) {
-        container.innerHTML = '<p>У вас пока нет книг.</p>';
-        return;
-      }
-      container.innerHTML = books.map(book => `
-        <div class="book" onclick="openReader(${book.id})">
-          <h3>${escapeHtml(book.name)}</h3>
-          <p>Автор: ${escapeHtml(book.author || '—')}</p>
-          <p>${escapeHtml(book.description || '')}</p>
-        </div>
-      `).join('');
+    async function getBookProgress(bookId) {
+        try {
+            const res = await fetch(`/bookShelf/api/books/${bookId}/progress`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (res.status === 404) {
+                // Прогресс еще не установлен
+                return { pageNumber: 0 };
+            }
+
+            if (!res.ok) {
+                throw new Error('Не удалось загрузить прогресс');
+            }
+
+            return await res.json();
+        } catch (err) {
+            console.error(`Ошибка загрузки прогресса для книги ${bookId}:`, err);
+            return { pageNumber: 0 };
+        }
+    }
+
+    async function renderBooks(books) {
+        const container = document.getElementById('books');
+
+<!--        if (books.length === 0) {-->
+<!--            container.innerHTML = `-->
+<!--                <div class="no-books">-->
+<!--                    <p>У вас пока нет книг в библиотеке</p>-->
+<!--                    <a href="/bookShelf/add-book.html" class="add-book-btn">-->
+<!--                        Добавить первую книгу-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            `;-->
+<!--            return;-->
+<!--        }-->
+
+        // Загружаем прогресс для всех книг параллельно
+        const progressPromises = books.map(book => getBookProgress(book.id));
+        const progresses = await Promise.all(progressPromises);
+
+        container.innerHTML = books.map((book, index) => {
+            const progress = progresses[index];
+            const pageNumber = progress.pageNumber || 0;
+
+            // Определяем общее количество страниц (предполагаем 150 слов на страницу)
+            // В реальном приложении это должно приходить с сервера
+            const totalPages = book.totalPages || 100;
+            const progressPercent = Math.min(100, Math.round((pageNumber / totalPages) * 100));
+
+            return `
+                <div class="book" onclick="openReader(${book.id})">
+                    <h3>${escapeHtml(book.name)}</h3>
+                    <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
+                    <p class="description">${escapeHtml(book.description || 'Без описания')}</p>
+
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span>Прогресс: ${pageNumber} / ${totalPages} страниц</span>
+                            <span>${progressPercent}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                        <div class="progress-text">
+                            ${getProgressStatus(pageNumber, totalPages)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function getProgressStatus(currentPage, totalPages) {
+        if (currentPage === 0) return 'Еще не начато';
+        if (currentPage === totalPages) return 'Завершено!';
+        if (currentPage < totalPages * 0.3) return 'Только начал читать';
+        if (currentPage < totalPages * 0.7) return 'В процессе чтения';
+        return 'Почти закончил';
     }
 
     function openReader(bookId) {
-      window.location.href = `/bookShelf/reader.html?bookId=${bookId}`;
+        window.location.href = `/bookShelf/reader.html?bookId=${bookId}`;
     }
 
     function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function showMessage(text, type = '') {
-      const el = document.getElementById('message');
-      el.textContent = text;
-      el.className = type;
+        const el = document.getElementById('message');
+        el.innerHTML = `
+            <span>ℹ️</span>
+            <span>${text}</span>
+        `;
+        el.className = type;
+
+        // Автоматически скрываем сообщение через 5 секунд
+        setTimeout(() => {
+            el.className = '';
+            el.innerHTML = '';
+        }, 5000);
     }
 
     // Загружаем книги при старте
     loadBooks();
 </script>
-
 </body>
 </html>

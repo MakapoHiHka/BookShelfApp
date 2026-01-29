@@ -1,9 +1,6 @@
 package com.example.book_test_connection.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Book {
@@ -16,6 +13,7 @@ public class Book {
     private String description;
     private String filePath;
     private String htmlPath;
+    private Integer totalPage;
 
     protected Book() {}
 
@@ -50,4 +48,7 @@ public class Book {
 
     public String getHtmlPath(){ return htmlPath; }
     public void setHtmlPath(String path){ this.htmlPath = path; }
+
+    public void setTotalPage(int totalPage){ this.totalPage = totalPage; System.out.println(12);}
+    public Integer getTotalPage() { return totalPage; }
 }

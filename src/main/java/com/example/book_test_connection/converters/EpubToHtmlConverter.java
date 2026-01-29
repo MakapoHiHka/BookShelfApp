@@ -1,5 +1,10 @@
 package com.example.book_test_connection.converters;
 
+import com.example.book_test_connection.dto.ConvertationResult;
+import com.example.book_test_connection.entity.Book;
+import com.example.book_test_connection.repository.BookRepository;
+import com.example.book_test_connection.service.HtmlConversionService;
+import jakarta.transaction.Transactional;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,6 +13,8 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
+
+//92
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +30,11 @@ public class EpubToHtmlConverter implements BookToHtmlConverter{
     private static final String CONTAINER_PATH = "META-INF/container.xml";
     private static final String DEFAULT_OPF_REL_PATH = "OEBPS/content.opf"; // fallback
     private static final int WORDS_PER_PAGE = 150;
+    private final BookRepository bookRepository;
+
+    EpubToHtmlConverter(BookRepository bookRepository){
+        this.bookRepository = bookRepository;
+    }
 
     @Override
     public boolean supports(String extension) {
@@ -37,7 +49,7 @@ public class EpubToHtmlConverter implements BookToHtmlConverter{
      * @return итоговый HTML как строка
      * @throws Exception при ошибках чтения/парсинга
      */
-    public String convertToHtml(Path sourcePath) throws Exception {
+    public ConvertationResult convertToHtml(Path sourcePath, Long bookId) throws Exception {
         Path tempDir = Files.createTempDirectory("epub_extract_");
         try {
             unzipEpub(sourcePath, tempDir);
@@ -60,17 +72,24 @@ public class EpubToHtmlConverter implements BookToHtmlConverter{
                 }
             }
 
+            // === Считаем totalPages ДО генерации HTML ===
+            int totalWords = countWordsInNodes(fullDoc.body().childNodes());
+            int totalPages = (int) Math.ceil((double) totalWords / WORDS_PER_PAGE);
+
+
             // Разбиваем на страницы с сохранением разметки
             Document pagedDoc = splitIntoWordPagesWithStructure(fullDoc, WORDS_PER_PAGE);
 
-            addStylesAndScript(pagedDoc);
-            return pagedDoc.html();
+            //book.setHtmlPath(htmlPath.toString());
+
+            return new ConvertationResult( pagedDoc.html(), totalPages);
         } finally {
             deleteRecursively(tempDir);
         }
     }
 
     // === ОСНОВНОЙ МЕТОД: разбивка с сохранением структуры ===
+    @Transactional
     private Document splitIntoWordPagesWithStructure(Document fullDoc, int wordsPerPage) {
         // Создаём полноценный HTML-документ
         Document result = new Document("");
