@@ -20,6 +20,14 @@ public class BookProgressService {
         this.bookProgressRepository = bookProgressRepository;
         this.bookRepository = bookRepository;
     }
+    //удалить прогресс
+    @Transactional
+    public void deleteBookProgressForAll(Long bookId){
+        //если прогресса нет - исключение не выбрасывается
+        if (bookProgressRepository.existsByBookId(bookId)){
+            bookProgressRepository.deleteByBookId(bookId);
+        }
+    }
 
     //создает или обновляет прогресс
     @Transactional

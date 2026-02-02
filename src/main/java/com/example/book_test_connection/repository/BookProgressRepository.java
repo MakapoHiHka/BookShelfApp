@@ -9,5 +9,7 @@ import java.util.Optional;
 public interface BookProgressRepository extends JpaRepository<BookProgress, Long> {
     Optional<BookProgress> findByUserIdAndBookId(Long userId, Long bookId);
     List<BookProgress> findByUserId(Long userId);
+    void deleteByBookId(Long bookId);
     void deleteByUserIdAndBookId(Long userId, Long bookId);
+    boolean existsByBookId(Long bookId);
 }

@@ -64,7 +64,8 @@ public class BookController {
     // DELETE /api/books/1 → удалить книгу
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
-        bookService.deleteBook(id);
+        bookService.deleteBook(id); //удаляем книку
+        bookProgressService.deleteBookProgressForAll(id); //удаляем прогресс ее чтения
         return ResponseEntity.noContent().build();
     }
 
@@ -101,7 +102,7 @@ public class BookController {
         return ResponseEntity.ok(updatedBook);
     }
 
-    // Вспомогательный метод: получает userId текущего пользователя
+    // Вспомогательный метод: получает userId текущего пользователя (из jwt?)
     private Long getCurrentUserId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return bookService.getUserIdByEmail(email); // делегируем сервису
