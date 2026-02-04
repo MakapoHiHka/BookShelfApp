@@ -6,362 +6,1038 @@
     <title>Моя библиотека — BookShelf</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+          max-width: 1200px;
+          margin: 0 auto;
         }
 
         header {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+          background: white;
+          padding: 20px 30px;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 15px;
         }
 
         h1 {
-            color: #1976d2;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+          color: #1976d2;
+          font-size: 2.5rem;
+          margin-bottom: 0;
         }
 
         .subtitle {
-            color: #666;
-            font-size: 1.1rem;
+          color: #666;
+          font-size: 1.1rem;
         }
 
-        .books-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
+        .actions {
+          display: flex;
+          gap: 10px;
+        }
+
+        .btn {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #388e3c, #1b5e20); color: white; }
+        .btn-danger { background: #f44336; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #667eea; color: #667eea; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Tabs */
+        .tabs {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 20px;
+          border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .tab {
+          padding: 10px 20px;
+          cursor: pointer;
+          border-bottom: 3px solid transparent;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.85); /* Белый с прозрачностью — отлично читается на градиенте */
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 8px 8px 0 0;
+          transition: all 0.2s ease;
+        }
+        .tab:hover {
+          color: white;
+          background: rgba(0, 0, 0, 0.2);
+        }
+        .tab.active {
+          color: white;
+          background: rgba(25, 118, 210, 0.3);
+          border-bottom-color: #1976d2;
+        }
+
+        /* Search */
+        .search-container {
+          margin-bottom: 20px;
+        }
+        #searchInput {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 1rem;
+        }
+
+        .books-container, .shelves-view {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+          gap: 25px;
         }
 
         .book {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .book-actions {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          display: flex;
+          gap: 6px;
+        }
+
+        .book-actions button {
+          width: 28px;
+          height: 28px;
+          padding: 0;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .book::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #667eea, #764ba2);
+          opacity: 0;
+          transition: opacity 0.3s ease;
         }
 
         .book:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            background: #f8f9ff;
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+          background: #f8f9ff;
         }
 
-        .book:hover::before {
-            opacity: 1;
-        }
+        .book:hover::before { opacity: 1; }
 
         .book h3 {
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-            font-size: 1.4rem;
-            font-weight: 600;
+          margin: 0 0 10px 0;
+          color: #2c3e50;
+          font-size: 1.4rem;
+          font-weight: 600;
         }
 
         .book p {
-            margin: 5px 0;
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.6;
+          margin: 5px 0;
+          color: #666;
+          font-size: 0.95rem;
+          line-height: 1.6;
         }
 
-        .author {
-            color: #1976d2;
-            font-weight: 500;
-        }
+        .author { color: #1976d2; font-weight: 500; }
 
         .progress-container {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e0e0e0;
+          margin-top: 15px;
+          padding-top: 15px;
+          border-top: 1px solid #e0e0e0;
         }
 
         .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #555;
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          font-size: 0.9rem;
+          color: #555;
         }
 
         .progress-bar {
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
+          height: 8px;
+          background: #e0e0e0;
+          border-radius: 4px;
+          overflow: hidden;
+          position: relative;
         }
 
         .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 4px;
-            transition: width 0.5s ease;
+          height: 100%;
+          background: linear-gradient(90deg, #667eea, #764ba2);
+          border-radius: 4px;
+          transition: width 0.5s ease;
         }
 
         .progress-text {
-            margin-top: 5px;
-            font-size: 0.85rem;
-            color: #999;
-            text-align: center;
+          margin-top: 5px;
+          font-size: 0.85rem;
+          color: #999;
+          text-align: center;
         }
 
         .no-books {
-            text-align: center;
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .no-books p {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .add-book-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .add-book-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          text-align: center;
+          padding: 40px;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          grid-column: 1 / -1;
         }
 
         #message {
-            margin: 20px 0;
-            padding: 15px 20px;
-            border-radius: 8px;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+          margin: 20px 0;
+          padding: 15px 20px;
+          border-radius: 8px;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 10px;
         }
 
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 4px solid #c62828;
-        }
-
-        .success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left: 4px solid #2e7d32;
-        }
+        .error { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
 
         .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+          text-align: center;
+          padding: 40px;
+          color: #666;
+          grid-column: 1 / -1;
+        }
+
+        /* Shelf detail view */
+        .shelf-detail {
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+          margin-bottom: 20px;
+        }
+
+        .shelf-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .shelf-section-title {
+          margin: 25px 0 15px;
+          color: #1976d2;
+        }
+
+        .remove-from-shelf-btn {
+          background: #ffebee;
+          color: #c62828;
+          border: 1px solid #ffcdd2;
+          padding: 4px 10px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+
+        /* Modal styles */
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+          background-color: white;
+          margin: 5% auto;
+          padding: 25px;
+          border-radius: 12px;
+          width: 90%;
+          max-width: 500px;
+          box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .close {
+          font-size: 24px;
+          cursor: pointer;
+          color: #999;
+        }
+
+        .form-group {
+          margin-bottom: 15px;
+        }
+
+        .form-group label {
+          display: block;
+          margin-bottom: 6px;
+          font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 1rem;
         }
 
         @media (max-width: 768px) {
-            .books-container {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .book {
-                padding: 15px;
-            }
+          .books-container, .shelves-view { grid-template-columns: 1fr; }
+          h1 { font-size: 2rem; }
+          header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <h1>Моя библиотека</h1>
-        <p class="subtitle">Ваши книги и прогресс чтения</p>
+        <div>
+            <h1>Моя библиотека</h1>
+            <p class="subtitle">Книги и прогресс чтения</p>
+        </div>
+        <div class="actions">
+            <button class="btn btn-primary" onclick="openModal('addBookModal')">Добавить книгу</button>
+            <button class="btn btn-success" onclick="openModal('addShelfModal')">Новая полка</button>
+        </div>
     </header>
 
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" data-tab="all-books">Все книги</div>
+        <div class="tab" data-tab="shelves">Полки</div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-container" id="searchContainer">
+        <input type="text" id="searchInput" placeholder="Поиск по названию, автору...">
+    </div>
+
+    <!-- Messages -->
     <div id="message"></div>
-    <div id="books" class="books-container">
+
+    <!-- All Books View -->
+    <div id="allBooksView" class="books-container">
         <div class="loading">Загрузка книг...</div>
+    </div>
+
+    <!-- Shelves View -->
+    <div id="shelvesView" class="shelves-view" style="display: none;">
+        <div class="loading">Загрузка полок...</div>
+    </div>
+</div>
+
+<!-- Existing modals (addBook, editBook, uploadFile, addShelf) -->
+<div id="addBookModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Добавить новую книгу</h2>
+            <span class="close" onclick="closeModal('addBookModal')">&times;</span>
+        </div>
+        <form id="addBookForm">
+            <div class="form-group">
+                <label for="bookName">Название *</label>
+                <input type="text" id="bookName" required>
+            </div>
+            <div class="form-group">
+                <label for="bookAuthor">Автор *</label>
+                <input type="text" id="bookAuthor" required>
+            </div>
+            <div class="form-group">
+                <label for="bookDescription">Описание</label>
+                <textarea id="bookDescription" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="shelfSelect">Полка</label>
+                <select id="shelfSelect">
+                    <option value="">Без полки</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Создать книгу</button>
+        </form>
+    </div>
+</div>
+
+<div id="editBookModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Редактировать книгу</h2>
+            <span class="close" onclick="closeModal('editBookModal')">&times;</span>
+        </div>
+        <form id="editBookForm">
+            <input type="hidden" id="editBookId">
+            <div class="form-group">
+                <label for="editBookName">Название *</label>
+                <input type="text" id="editBookName" required>
+            </div>
+            <div class="form-group">
+                <label for="editBookAuthor">Автор *</label>
+                <input type="text" id="editBookAuthor" required>
+            </div>
+            <div class="form-group">
+                <label for="editBookDescription">Описание</label>
+                <textarea id="editBookDescription" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<div id="uploadFileModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Загрузить файл книги</h2>
+            <span class="close" onclick="closeModal('uploadFileModal')">&times;</span>
+        </div>
+        <form id="uploadFileForm" enctype="multipart/form-data">
+            <input type="hidden" id="uploadBookId">
+            <div class="form-group">
+                <label for="bookFile">Файл книги (.txt, .epub и др.)</label>
+                <input type="file" id="bookFile" accept=".txt,.epub,.pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Загрузить</button>
+        </form>
+    </div>
+</div>
+
+<div id="addShelfModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Создать новую полку</h2>
+            <span class="close" onclick="closeModal('addShelfModal')">&times;</span>
+        </div>
+        <form id="addShelfForm">
+            <div class="form-group">
+                <label for="shelfName">Название полки *</label>
+                <input type="text" id="shelfName" required minlength="1">
+            </div>
+            <button type="submit" class="btn btn-success">Создать</button>
+        </form>
+    </div>
+</div>
+
+<!-- NEW MODAL: Select shelf to add book -->
+<div id="selectShelfModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Добавить в полку</h2>
+            <span class="close" onclick="closeModal('selectShelfModal')">&times;</span>
+        </div>
+        <form id="selectShelfForm">
+            <input type="hidden" id="addToShelfBookId">
+            <div class="form-group">
+                <label for="targetShelfSelect">Выберите полку</label>
+                <select id="targetShelfSelect" required>
+                    <option value="">— Выберите полку —</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
     </div>
 </div>
 
 <script>
     const token = localStorage.getItem('jwtToken');
     if (!token) {
-        window.location.href = '/bookShelf/login.html';
+      window.location.href = '/bookShelf/login.html';
+    }
+
+    let allBooks = [];
+    let allShelves = [];
+
+    // ======================
+    // TABS & SEARCH
+    // ======================
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const tabName = tab.dataset.tab;
+        document.getElementById('allBooksView').style.display = tabName === 'all-books' ? 'grid' : 'none';
+        document.getElementById('shelvesView').style.display = tabName === 'shelves' ? 'grid' : 'none';
+        document.getElementById('searchContainer').style.display = tabName === 'all-books' ? 'block' : 'none';
+
+        if (tabName === 'shelves') {
+          loadShelvesForView();
+        }
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      renderBooks(allBooks, query);
+    });
+
+    // ======================
+    // SHELF OPERATIONS
+    // ======================
+
+    async function addToShelf(shelfId, bookId) {
+      try {
+        const res = await fetch(`/bookShelf/api/bookshelves/${shelfId}/books/${bookId}`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          showMessage('Книга добавлена в полку', 'success');
+          await Promise.all([loadBooks(), loadShelvesForView()]);
+        } else {
+          throw new Error('Не удалось добавить книгу');
+        }
+      } catch (err) {
+        showMessage('Ошибка: ' + err.message, 'error');
+      }
+    }
+
+    async function removeFromShelf(shelfId, bookId) {
+      try {
+        const res = await fetch(`/bookShelf/api/bookshelves/${shelfId}/books/${bookId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          showMessage('Книга удалена из полки', 'success');
+          await Promise.all([loadBooks(), loadShelvesForView()]);
+        } else {
+          throw new Error('Не удалось убрать книгу');
+        }
+      } catch (err) {
+        showMessage('Ошибка: ' + err.message, 'error');
+      }
+    }
+
+    // ======================
+    // BOOKS & PROGRESS
+    // ======================
+
+    async function getBookProgress(bookId) {
+      try {
+        const res = await fetch(`/bookShelf/api/books/${bookId}/progress`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (res.status === 404) {
+          return { pageNumber: 0 };
+        }
+
+        if (!res.ok) {
+          throw new Error('Не удалось загрузить прогресс');
+        }
+
+        return await res.json();
+      } catch (err) {
+        console.error(`Ошибка загрузки прогресса для книги ${bookId}:`, err);
+        return { pageNumber: 0 };
+      }
     }
 
     async function loadBooks() {
-        try {
-            const res = await fetch('/bookShelf/api/books', {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
+      try {
+        const res = await fetch('/bookShelf/api/books', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Не удалось загрузить книги');
+        allBooks = await res.json();
 
-            if (!res.ok) {
-                throw new Error('Не удалось загрузить книги');
-            }
+        const progressPromises = allBooks.map(book =>
+          getBookProgress(book.id).then(p => ({ ...book, _progress: p }))
+        );
+        allBooks = await Promise.all(progressPromises);
 
-            const books = await res.json();
-            renderBooks(books);
-        } catch (err) {
-            showMessage('Ошибка: ' + err.message, 'error');
-        }
+        renderBooks(allBooks);
+      } catch (err) {
+        showMessage('Ошибка: ' + err.message, 'error');
+      }
     }
 
-    async function getBookProgress(bookId) {
-        try {
-            const res = await fetch(`/bookShelf/api/books/${bookId}/progress`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
+    function renderBooks(books, query = '') {
+      const container = document.getElementById('allBooksView');
 
-            if (res.status === 404) {
-                return { pageNumber: 0 };
-            }
+      if (query) {
+        books = books.filter(book =>
+          book.name.toLowerCase().includes(query) ||
+          (book.author && book.author.toLowerCase().includes(query))
+        );
+      }
 
-            if (!res.ok) {
-                throw new Error('Не удалось загрузить прогресс');
-            }
+      if (books.length === 0) {
+        container.innerHTML = `<div class="no-books">
+          ${query ? 'Ничего не найдено' : 'У вас пока нет книг'}
+        </div>`;
+        return;
+      }
 
-            return await res.json();
-        } catch (err) {
-            console.error(`Ошибка загрузки прогресса для книги ${bookId}:`, err);
-            return { pageNumber: 0 };
+      container.innerHTML = books.map(book => {
+        const currentPage = book._progress?.pageNumber || 0;
+        const totalPages = book.totalPage;
+        let progressSection = '';
+
+        if (totalPages && totalPages > 0) {
+          const progressPercent = Math.min(100, Math.round((currentPage / totalPages) * 100));
+          const statusText = getProgressStatus(currentPage, totalPages);
+          progressSection = `
+            <div class="progress-container">
+              <div class="progress-header">
+                <span>Прогресс: ${currentPage} / ${totalPages}</span>
+                <span>${progressPercent}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progressPercent}%"></div>
+              </div>
+              <div class="progress-text">${statusText}</div>
+            </div>
+          `;
         }
-    }
 
-    async function renderBooks(books) {
-        const container = document.getElementById('books');
+        // Проверяем, в каких полках уже есть книга
+        const inShelves = allShelves.filter(shelf =>
+          shelf.bookIds?.some(b => b.id === book.id)
+        );
 
-        if (books.length === 0) {
-            container.innerHTML = `
-                <div class="no-books">
-                    <p>У вас пока нет книг в библиотеке</p>
-                    <a href="/bookShelf/add-book.html" class="add-book-btn">
-                        Добавить первую книгу
-                    </a>
-                </div>
-            `;
-            return;
-        }
-
-        // Загружаем прогресс для всех книг параллельно
-        const progressPromises = books.map(book => getBookProgress(book.id));
-        const progresses = await Promise.all(progressPromises);
-
-        container.innerHTML = books.map((book, index) => {
-            const progress = progresses[index];
-            const currentPage = progress.pageNumber || 0;
-            const totalPages = book.totalPage; // теперь берём из сущности книги
-
-            let progressSection = '';
-
-            // Отображаем прогресс только если totalPages задано и > 0
-            if (totalPages && totalPages > 0) {
-                const progressPercent = Math.min(100, Math.round((currentPage / totalPages) * 100));
-                const statusText = getProgressStatus(currentPage, totalPages);
-
-                progressSection = `
-                    <div class="progress-container">
-                        <div class="progress-header">
-                            <span>Прогресс: ${currentPage} / ${totalPages}</span>
-                            <span>${progressPercent}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                        </div>
-                        <div class="progress-text">${statusText}</div>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="book" onclick="openReader(${book.id}, ${currentPage})">
-                    <h3>${escapeHtml(book.name)}</h3>
-                    <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
-                    <p class="description">${escapeHtml(book.description || 'Без описания')}</p>
-                    ${progressSection}
-                </div>
-            `;
-        }).join('');
+        return `
+          <div class="book" onclick="openReader(${book.id}, ${currentPage})">
+            <div class="book-actions">
+              <button class="btn btn-primary" title="В полку" onclick="event.stopPropagation(); openSelectShelfModal(${book.id})">➕</button>
+              ${!book.filePath && !book.htmlPath ? `<button class="btn btn-primary" title="Загрузить файл" onclick="event.stopPropagation(); openUploadModal(${book.id})">📄</button>` : ''}
+              <button class="btn btn-primary" title="Редактировать" onclick="event.stopPropagation(); openEditModal(${book.id}, '${escapeHtml(book.name)}', '${escapeHtml(book.author)}', '${escapeHtml(book.description || '')}')">✏️</button>
+              <button class="btn btn-danger" title="Удалить" onclick="event.stopPropagation(); deleteBook(${book.id})">×</button>
+            </div>
+            <h3>${escapeHtml(book.name)}</h3>
+            <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
+            <p class="description">${escapeHtml(book.description || 'Без описания')}</p>
+            ${inShelves.length > 0 ? `<p style="font-size:0.85rem;color:#1976d2;margin-top:8px;">В полках: ${inShelves.map(s => s.name).join(', ')}</p>` : ''}
+            ${progressSection}
+          </div>
+        `;
+      }).join('');
     }
 
     function getProgressStatus(currentPage, totalPages) {
-        if (currentPage === 0) return 'Еще не начато';
-        if (currentPage >= totalPages) return 'Завершено!';
-        if (currentPage < totalPages * 0.3) return 'Только начал читать';
-        if (currentPage < totalPages * 0.7) return 'В процессе чтения';
-        return 'Почти закончил';
+      if (currentPage === 0) return 'Еще не начато';
+      if (currentPage >= totalPages) return 'Завершено!';
+      if (currentPage < totalPages * 0.3) return 'Только начал читать';
+      if (currentPage < totalPages * 0.7) return 'В процессе чтения';
+      return 'Почти закончил';
     }
 
+    // ======================
+    // SHELVES VIEW (only books IN shelf)
+    // ======================
+
+    async function loadShelvesForView() {
+      try {
+        const res = await fetch('/bookShelf/api/bookshelves', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Не удалось загрузить полки');
+        allShelves = await res.json();
+        renderShelvesView();
+      } catch (err) {
+        showMessage('Ошибка: ' + err.message, 'error');
+      }
+    }
+
+    function renderShelvesView() {
+      const container = document.getElementById('shelvesView');
+      if (allShelves.length === 0) {
+        container.innerHTML = `<div class="no-books">Нет созданных полок. Создайте первую!</div>`;
+        return;
+      }
+
+      container.innerHTML = allShelves.map(shelf => `
+        <div class="shelf-detail">
+          <div class="shelf-header">
+            <h2>${escapeHtml(shelf.name)}</h2>
+            <button class="btn btn-danger" onclick="deleteShelf(${shelf.id})">×</button>
+          </div>
+
+          <h3 class="shelf-section-title">Книги в полке</h3>
+          <div id="shelf-books-${shelf.id}" class="books-container">
+            ${shelf.bookIds && shelf.bookIds.length > 0
+              ? shelf.bookIds.map(book => renderBookInShelf(book, shelf.id)).join('')
+              : '<p>Пусто</p>'
+            }
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderBookInShelf(book, shelfId) {
+      // Ищем прогресс книги
+      const fullBook = allBooks.find(b => b.id === book.id);
+      const currentPage = fullBook?._progress?.pageNumber || 0;
+      const totalPages = fullBook?.totalPage || 0;
+
+      let progressSection = '';
+      if (totalPages > 0) {
+        const progressPercent = Math.min(100, Math.round((currentPage / totalPages) * 100));
+        const statusText = getProgressStatus(currentPage, totalPages);
+        progressSection = `
+          <div class="progress-container">
+            <div class="progress-header">
+              <span>${currentPage} / ${totalPages}</span>
+              <span>${progressPercent}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+            <div class="progress-text">${statusText}</div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="book" onclick="openReader(${book.id}, ${currentPage})">
+          <h3>${escapeHtml(book.name)}</h3>
+          <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
+          <p class="description">${escapeHtml(book.description || '')}</p>
+          ${progressSection}
+          <div style="margin-top: 10px;">
+            <button class="remove-from-shelf-btn" onclick="event.stopPropagation(); removeFromShelf(${shelfId}, ${book.id})">Убрать</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ======================
+    // NEW: Select shelf modal
+    // ======================
+
+    function openSelectShelfModal(bookId) {
+      document.getElementById('addToShelfBookId').value = bookId;
+      updateTargetShelfSelect();
+      openModal('selectShelfModal');
+    }
+
+    function updateTargetShelfSelect() {
+      const select = document.getElementById('targetShelfSelect');
+      select.innerHTML = '<option value="">— Выберите полку —</option>';
+      allShelves.forEach(shelf => {
+        const option = document.createElement('option');
+        option.value = shelf.id;
+        option.textContent = shelf.name;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById('selectShelfForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bookId = document.getElementById('addToShelfBookId').value;
+      const shelfId = document.getElementById('targetShelfSelect').value;
+
+      if (!shelfId) {
+        showMessage('Выберите полку', 'error');
+        return;
+      }
+
+      await addToShelf(shelfId, bookId);
+      closeModal('selectShelfModal');
+    });
+
+    // ======================
+    // CRUD OPERATIONS
+    // ======================
+
+    // Create book
+    document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('bookName').value.trim();
+      const author = document.getElementById('bookAuthor').value.trim();
+      const description = document.getElementById('bookDescription').value.trim();
+      const shelfId = document.getElementById('shelfSelect').value;
+
+      try {
+        const res = await fetch('/bookShelf/api/books', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ name, author, description })
+        });
+
+        if (res.ok) {
+          const book = await res.json();
+          if (shelfId) {
+            await fetch(`/bookShelf/api/bookshelves/${shelfId}/books/${book.id}`, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+          }
+          closeModal('addBookModal');
+          showMessage('Книга создана!', 'success');
+          await loadBooks();
+          await loadShelvesForView();
+          await loadShelves();
+        } else {
+          const error = await res.text();
+          showMessage('Ошибка: ' + error, 'error');
+        }
+      } catch (err) {
+        showMessage('Ошибка сети: ' + err.message, 'error');
+      }
+    });
+
+    // Edit book
+    function openEditModal(id, name, author, description) {
+      document.getElementById('editBookId').value = id;
+      document.getElementById('editBookName').value = name;
+      document.getElementById('editBookAuthor').value = author;
+      document.getElementById('editBookDescription').value = description;
+      openModal('editBookModal');
+    }
+
+    document.getElementById('editBookForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editBookId').value;
+      const name = document.getElementById('editBookName').value.trim();
+      const author = document.getElementById('editBookAuthor').value.trim();
+      const description = document.getElementById('editBookDescription').value.trim();
+
+      try {
+        const res = await fetch(`/bookShelf/api/books/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ name, author, description })
+        });
+
+        if (res.ok) {
+          closeModal('editBookModal');
+          showMessage('Книга обновлена!', 'success');
+          await loadBooks();
+          await loadShelvesForView();
+        } else {
+          const error = await res.text();
+          showMessage('Ошибка: ' + error, 'error');
+        }
+      } catch (err) {
+        showMessage('Ошибка сети: ' + err.message, 'error');
+      }
+    });
+
+    // Delete book
+    async function deleteBook(bookId) {
+      if (!confirm('Удалить книгу? Это действие нельзя отменить.')) return;
+      try {
+        const res = await fetch(`/bookShelf/api/books/${bookId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          showMessage('Книга удалена', 'success');
+          await loadBooks();
+          await loadShelvesForView();
+        } else {
+          throw new Error('Не удалось удалить книгу');
+        }
+      } catch (err) {
+        showMessage('Ошибка: ' + err.message, 'error');
+      }
+    }
+
+    // Upload file
+    function openUploadModal(bookId) {
+      document.getElementById('uploadBookId').value = bookId;
+      openModal('uploadFileModal');
+    }
+
+    document.getElementById('uploadFileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bookId = document.getElementById('uploadBookId').value;
+      const fileInput = document.getElementById('bookFile');
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch(`/bookShelf/api/books/${bookId}/upload-file`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+
+        if (res.ok) {
+          closeModal('uploadFileModal');
+          showMessage('Файл загружен!', 'success');
+          fileInput.value = '';
+        } else {
+          const error = await res.text();
+          showMessage('Ошибка: ' + error, 'error');
+        }
+      } catch (err) {
+        showMessage('Ошибка сети: ' + err.message, 'error');
+      }
+    });
+
+    // Shelves CRUD
+    async function loadShelves() {
+      try {
+        const res = await fetch('/bookShelf/api/bookshelves', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Не удалось загрузить полки');
+        const shelves = await res.json();
+        allShelves = shelves;
+        updateShelfSelect(shelves);
+        updateTargetShelfSelect(); // обновляем и в новом модале
+      } catch (err) {
+        console.warn('Ошибка загрузки полок:', err);
+      }
+    }
+
+    function updateShelfSelect(shelves) {
+      const select = document.getElementById('shelfSelect');
+      select.innerHTML = '<option value="">Без полки</option>';
+      shelves.forEach(shelf => {
+        const option = document.createElement('option');
+        option.value = shelf.id;
+        option.textContent = shelf.name;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById('addShelfForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('shelfName').value.trim();
+      try {
+        const res = await fetch('/bookShelf/api/bookshelves', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ name })
+        });
+        if (res.ok) {
+          closeModal('addShelfModal');
+          showMessage('Полка создана!', 'success');
+          await loadShelvesForView();
+          await loadShelves();
+        } else {
+          const error = await res.text();
+          showMessage('Ошибка: ' + error, 'error');
+        }
+      } catch (err) {
+        showMessage('Ошибка сети: ' + err.message, 'error');
+      }
+    });
+
+    async function deleteShelf(shelfId) {
+      if (!confirm('Удалить полку? Книги останутся в библиотеке.')) return;
+      try {
+        const res = await fetch(`/bookShelf/api/bookshelves/${shelfId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          showMessage('Полка удалена', 'success');
+          await loadShelvesForView();
+          await loadShelves();
+        } else {
+          throw new Error('Не удалось удалить полку');
+        }
+      } catch (err) {
+        showMessage('Ошибка: ' + err.message, 'error');
+      }
+    }
+
+    // ======================
+    // UTILS
+    // ======================
+
     function openReader(bookId, page) {
-        // Если страница не указана или 0 — начинаем с 1
-        const targetPage = page > 0 ? page : 1;
-        window.location.href = `/bookShelf/reader.html?bookId=${bookId}&page=${targetPage}`;
+      const targetPage = page > 0 ? page : 1;
+      window.location.href = `/bookShelf/reader.html?bookId=${bookId}&page=${targetPage}`;
     }
 
     function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     function showMessage(text, type = '') {
-        const el = document.getElementById('message');
-        el.innerHTML = `
-            <span>ℹ️</span>
-            <span>${text}</span>
-        `;
-        el.className = type;
-
-        setTimeout(() => {
-            el.className = '';
-            el.innerHTML = '';
-        }, 5000);
+      const el = document.getElementById('message');
+      el.innerHTML = `<span>ℹ️</span><span>${text}</span>`;
+      el.className = type;
+      setTimeout(() => {
+        el.className = '';
+        el.innerHTML = '';
+      }, 5000);
     }
 
+    function openModal(id) {
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    }
+
+    // Инициализация
     loadBooks();
+    loadShelves();
 </script>
 </body>
 </html>

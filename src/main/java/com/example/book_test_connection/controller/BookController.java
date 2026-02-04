@@ -78,18 +78,21 @@ public class BookController {
             @RequestParam("file") MultipartFile file,
             UriComponentsBuilder uriBuilder
     ) {
-        if (file.isEmpty()) {
-            throw new UploadErrorException("File cannot be empty");
-        }
 
         BookCreateRequest request = new BookCreateRequest();
         request.setName(name);
         request.setAuthor(author);
         request.setDescription(description);
 
-        Book savedBook = bookService.createBookWithFile(request, file);
-        var location = uriBuilder.path("/api/books/{id}").buildAndExpand(savedBook.getId()).toUri();
-        return ResponseEntity.created(location).body(savedBook);
+        if (file.isEmpty()) {
+            Book savedBook = bookService.createBook(request);
+            var location = uriBuilder.path("/api/books/{id}").buildAndExpand(savedBook.getId()).toUri();
+            return ResponseEntity.created(location).body(savedBook);
+        } else {
+            Book savedBook = bookService.createBookWithFile(request, file);
+            var location = uriBuilder.path("/api/books/{id}").buildAndExpand(savedBook.getId()).toUri();
+            return ResponseEntity.created(location).body(savedBook);
+        }
     }
 
     //прикрепить файл к уже созданной книге

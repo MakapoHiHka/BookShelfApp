@@ -2,65 +2,149 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Регистрация — BookShelf</title>
   <!-- reCAPTCHA -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+      padding: 20px;
     }
+
     .card {
       background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      width: 320px;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 420px;
+      animation: fadeIn 0.4s ease-out;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .card h2 {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 24px;
       color: #1976d2;
+      font-size: 1.8rem;
+      font-weight: 600;
     }
-    .card input {
-      width: 100%;
-      padding: 0.6rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
+
+    .input-group {
+      margin-bottom: 20px;
     }
-    .card button {
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .input-group input {
       width: 100%;
-      padding: 0.6rem;
-      background: #388e3c; /* зелёный для регистрации */
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
       font-size: 1rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    .card button:hover {
-      background: #2e7d32;
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
     }
-    #message {
-      margin-top: 1rem;
-      text-align: center;
-      min-height: 1.5rem;
-    }
-    .error { color: #d32f2f; }
-    .success { color: #2e7d32; }
 
     /* Стиль для капчи */
     .g-recaptcha {
-      margin: 1rem 0;
+      margin: 16px 0;
       display: flex;
       justify-content: center;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #388e3c, #1b5e20);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.3s, transform 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.95;
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    #message {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+      min-height: 24px;
+      display: none;
+    }
+
+    #message.show {
+      display: block;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .footer a {
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .footer a:hover {
+      color: #0d47a1;
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -68,20 +152,50 @@
 
 <div class="card">
   <h2>Регистрация</h2>
-  <form id="registerForm">
-    <input type="text" id="username" placeholder="Имя" required>
-    <input type="email" id="email" placeholder="Email" required autocomplete="email">
-    <input type="password" id="password" placeholder="Пароль" required autocomplete="new-password">
 
-    <!-- reCAPTCHA (вставь свой site key!) -->
+  <form id="registerForm">
+    <div class="input-group">
+      <label for="username">Имя пользователя</label>
+      <input
+              type="text"
+              id="username"
+              required
+              minlength="2"
+      >
+    </div>
+
+    <div class="input-group">
+      <label for="email">Email</label>
+      <input
+              type="email"
+              id="email"
+              required
+              autocomplete="email"
+      >
+    </div>
+
+    <div class="input-group">
+      <label for="password">Пароль</label>
+      <input
+              type="password"
+              id="password"
+              required
+              minlength="6"
+              autocomplete="new-password"
+      >
+    </div>
+
+    <!-- reCAPTCHA (вставьте ваш site key!) -->
     <div class="g-recaptcha" data-sitekey="6Ld2nFEsAAAAADoTdQoP1xA7a_EF9ozHAQ0jk8xu"></div>
 
-    <button type="submit">Зарегистрироваться</button>
+    <button type="submit" class="btn">Зарегистрироваться</button>
   </form>
+
   <div id="message"></div>
-  <p style="text-align: center; margin-top: 1rem;">
-    <a href="/bookShelf/login.html" style="color: #1976d2; text-decoration: none;">Уже есть аккаунт?</a>
-  </p>
+
+  <div class="footer">
+    Уже есть аккаунт? <a href="/bookShelf/login.html">Войти</a>
+  </div>
 </div>
 
 <script>
@@ -94,14 +208,21 @@
       return;
     }
 
-    const data = {
-      username: document.getElementById('username').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      password: document.getElementById('password').value,
-      captchaResponse: captchaResponse
-    };
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
 
-    const msg = document.getElementById('message');
+    if (!username || !email || !password) {
+      showMessage('Все поля обязательны для заполнения.', 'error');
+      return;
+    }
+
+    const data = {
+      username,
+      email,
+      password,
+      captchaResponse
+    };
 
     try {
       const res = await fetch('/bookShelf/api/auth/register', {
@@ -112,16 +233,21 @@
 
       if (res.ok) {
         showMessage('Успешно! Проверьте почту для подтверждения.', 'success');
-        // Опционально: перенаправить через 2 сек
         setTimeout(() => {
-          window.location.href = 'bookShelf/login.html';
-        }, 2000);
+          window.location.href = '/bookShelf/login.html';
+        }, 2500);
       } else {
-        const errorText = await res.text();
-        showMessage('Ошибка: ' + errorText, 'error');
+        // Получаем ТОЧНОЕ сообщение от сервера
+        let errorMessage = 'Неизвестная ошибка при регистрации.';
+        try {
+          errorMessage = await res.text(); // Например: "Имя пользователя уже используется"
+        } catch (err) {
+          console.warn('Не удалось прочитать тело ошибки:', err);
+        }
+        showMessage(errorMessage, 'error');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Сетевая ошибка:', err);
       showMessage('Ошибка сети: не удаётся подключиться к серверу.', 'error');
     }
   });
@@ -129,7 +255,7 @@
   function showMessage(text, type) {
     const el = document.getElementById('message');
     el.textContent = text;
-    el.className = type;
+    el.className = 'show ' + type;
   }
 </script>
 
