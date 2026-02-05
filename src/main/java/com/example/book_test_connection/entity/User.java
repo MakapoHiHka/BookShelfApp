@@ -1,5 +1,6 @@
 package com.example.book_test_connection.entity;
 
+import com.example.book_test_connection.utils.Role;
 import jakarta.persistence.*;
 import java.util.Objects;
 
@@ -13,6 +14,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -77,6 +82,9 @@ public class User {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+    public Role getRole(){ return role; }
+    public void setRole(Role role){ this.role = role; }
 
     // --- equals / hashCode / toString (опционально, но полезно для тестов) ---
 

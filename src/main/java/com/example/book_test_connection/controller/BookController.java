@@ -4,13 +4,22 @@ import com.example.book_test_connection.dto.BookCreateRequest;
 import com.example.book_test_connection.dto.BookProgressUpdateRequest;
 import com.example.book_test_connection.entity.Book;
 import com.example.book_test_connection.entity.BookProgress;
+import com.example.book_test_connection.entity.User;
+import com.example.book_test_connection.exceptions.NotEnoughRightsException;
 import com.example.book_test_connection.exceptions.UploadErrorException;
+import com.example.book_test_connection.repository.BookshelfRepository;
+import com.example.book_test_connection.repository.UserRepository;
 import com.example.book_test_connection.service.BookProgressService;
 import com.example.book_test_connection.service.BookService;
+import com.example.book_test_connection.service.BookshelfService;
+import com.example.book_test_connection.service.UserService;
+import com.example.book_test_connection.utils.Role;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -29,16 +39,25 @@ public class BookController {
 
     private final BookService bookService;
     private final BookProgressService bookProgressService;
+    private final UserService userService;
+    private final BookshelfRepository bookshelfRepository;
 
-    public BookController(BookService bookService, BookProgressService bookProgressService) {
+    public BookController(BookService bookService, BookProgressService bookProgressService, UserService userService, BookshelfRepository bookshelfRepository) {
         this.bookService = bookService;
         this.bookProgressService = bookProgressService;
+        this.userService = userService;
+        this.bookshelfRepository = bookshelfRepository;
     }
 
     // GET /api/books → получить все книги
     @GetMapping
     public List<Book> getAllBooks() {
-        return bookService.findAllBooks();
+        boolean isAdmin = isCurrentUserAdmin();
+        List<Book> books = bookService.findAllBooks();
+        for (Book book : books) {
+            book.setCanDelete(isAdmin);
+        }
+        return books;
     }
 
     // GET /api/books/1 → получить книгу по ID
@@ -64,6 +83,10 @@ public class BookController {
     // DELETE /api/books/1 → удалить книгу
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        if(!isCurrentUserAdmin()){
+            throw new NotEnoughRightsException("У вас недостаточно прав");
+        }
+        bookshelfRepository.deleteBookFromAllShelves(id);
         bookService.deleteBook(id); //удаляем книку
         bookProgressService.deleteBookProgressForAll(id); //удаляем прогресс ее чтения
         return ResponseEntity.noContent().build();
@@ -105,11 +128,6 @@ public class BookController {
         return ResponseEntity.ok(updatedBook);
     }
 
-    // Вспомогательный метод: получает userId текущего пользователя (из jwt?)
-    private Long getCurrentUserId() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return bookService.getUserIdByEmail(email); // делегируем сервису
-    }
 
     // Получить прогресс чтения книги
     @GetMapping("/{bookId}/progress")
@@ -184,5 +202,24 @@ public class BookController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+
+    // Вспомогательный метод: получает userId текущего пользователя (из jwt?)
+    private Long getCurrentUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return bookService.getUserIdByEmail(email); // делегируем сервису
+    }
+
+    private String getCurrentUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User not authenticated");
+        }
+        return authentication.getName(); // это email, если вы используете email как username
+    }
+
+    private boolean isCurrentUserAdmin() {
+        return userService.isUserAdmin(getCurrentUserId());
     }
 }

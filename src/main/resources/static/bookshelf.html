@@ -649,7 +649,7 @@
               <button class="btn btn-primary" title="В полку" onclick="event.stopPropagation(); openSelectShelfModal(${book.id})">➕</button>
               ${!book.filePath && !book.htmlPath ? `<button class="btn btn-primary" title="Загрузить файл" onclick="event.stopPropagation(); openUploadModal(${book.id})">📄</button>` : ''}
               <button class="btn btn-primary" title="Редактировать" onclick="event.stopPropagation(); openEditModal(${book.id}, '${escapeHtml(book.name)}', '${escapeHtml(book.author)}', '${escapeHtml(book.description || '')}')">✏️</button>
-              <button class="btn btn-danger" title="Удалить" onclick="event.stopPropagation(); deleteBook(${book.id})">×</button>
+              ${book.canDelete ? `<button class="btn btn-danger" title="Удалить" onclick="event.stopPropagation(); deleteBook(${book.id})">×</button>` : ''}
             </div>
             <h3>${escapeHtml(book.name)}</h3>
             <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
@@ -741,9 +741,10 @@
           <p class="author">Автор: ${escapeHtml(book.author || '—')}</p>
           <p class="description">${escapeHtml(book.description || '')}</p>
           ${progressSection}
-          <div style="margin-top: 10px;">
-            <button class="remove-from-shelf-btn" onclick="event.stopPropagation(); removeFromShelf(${shelfId}, ${book.id})">Убрать</button>
-          </div>
+            <div style="margin-top: 10px; display: flex; gap: 6px; align-items: center;">
+              <button class="remove-from-shelf-btn" onclick="event.stopPropagation(); removeFromShelf(${shelfId}, ${book.id})">Убрать</button>
+              ${book.canDelete ? `<button class="btn btn-danger" style="padding:4px 8px;font-size:0.85rem;" onclick="event.stopPropagation(); deleteBook(${book.id})">×</button>` : ''}
+            </div>
         </div>
       `;
     }

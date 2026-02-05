@@ -1,5 +1,6 @@
 package com.example.book_test_connection.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +15,10 @@ public class Book {
     private String filePath;
     private String htmlPath;
     private Integer totalPage;
+
+    @Transient // ← Это ключевое: поле НЕ будет сохраняться в БД и НЕ попадёт в JSON по умолчанию
+    @JsonProperty("canDelete")
+    private boolean canDelete = false;
 
     protected Book() {}
 
@@ -51,4 +56,12 @@ public class Book {
 
     public void setTotalPage(int totalPage){ this.totalPage = totalPage; System.out.println(12);}
     public Integer getTotalPage() { return totalPage; }
+
+    public boolean isCanDelete() {
+        return canDelete;
+    }
+
+    public void setCanDelete(boolean canDelete) {
+        this.canDelete = canDelete;
+    }
 }

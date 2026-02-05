@@ -9,6 +9,7 @@ import com.example.book_test_connection.exceptions.TokenException;
 import com.example.book_test_connection.exceptions.UsernameAlreadyExistsException;
 import com.example.book_test_connection.repository.ConfirmationTokenRepository;
 import com.example.book_test_connection.repository.UserRepository;
+import com.example.book_test_connection.utils.Role;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,5 +78,11 @@ public class UserService {
         User user = confirmationToken.getUser();
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public boolean isUserAdmin(Long userId) {
+        return userRepository.findById(userId)
+                .map(user -> user.getRole() == Role.ADMIN)
+                .orElse(false);
     }
 }

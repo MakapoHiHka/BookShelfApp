@@ -2,9 +2,13 @@ package com.example.book_test_connection.service;
 
 import com.example.book_test_connection.entity.Bookshelf;
 import com.example.book_test_connection.entity.User;
+import com.example.book_test_connection.exceptions.BookNotFoundException;
 import com.example.book_test_connection.repository.BookRepository;
 import com.example.book_test_connection.repository.BookshelfRepository;
 import com.example.book_test_connection.repository.UserRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +51,7 @@ public class BookshelfService {
     public void addBookToShelf(Long shelfId, Long bookId, Long currentUserId) {
         // Проверяем существование книги
         if (!bookRepository.existsById(bookId)) {
-            throw new RuntimeException("Book not found with id: " + bookId);
+            throw new BookNotFoundException("Book not found with id: " + bookId);
         }
 
         Bookshelf shelf = bookshelfRepository.findById(shelfId)
@@ -57,7 +61,6 @@ public class BookshelfService {
         if (!shelf.getUser().getId().equals(currentUserId)) {
             throw new RuntimeException("You do not own this bookshelf");
         }
-
         shelf.addBook(bookRepository.findBookById(bookId));
         bookshelfRepository.save(shelf);
     }
@@ -77,7 +80,6 @@ public class BookshelfService {
         if (!bookExistsInShelf) {
             throw new RuntimeException("Book is not in this bookshelf");
         }
-
         // Удаляем по ID
         shelf.getBooks().removeIf(book -> book.getId().equals(bookId));
         bookshelfRepository.save(shelf);
@@ -90,7 +92,6 @@ public class BookshelfService {
         if (!shelf.getUser().getId().equals(currentUserId)) {
             throw new RuntimeException("You do not own this bookshelf");
         }
-
         bookshelfRepository.delete(shelf);
     }
 }
