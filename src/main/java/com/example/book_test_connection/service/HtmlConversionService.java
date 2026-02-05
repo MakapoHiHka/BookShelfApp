@@ -4,6 +4,7 @@ package com.example.book_test_connection.service;
 import com.example.book_test_connection.converters.BookToHtmlConverter;
 import com.example.book_test_connection.dto.ConvertationResult;
 import com.example.book_test_connection.entity.Book;
+import com.example.book_test_connection.exceptions.UnableFormatException;
 import com.example.book_test_connection.repository.BookRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -101,7 +101,7 @@ public class HtmlConversionService {
         return converters.stream()
                 .filter(converter -> converter.supports(extension))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new UnableFormatException(
                         "Конвертация формата ." + extension + " не поддерживается. Доступные форматы определяются зарегистрированными конвертерами."
                 ));
     }

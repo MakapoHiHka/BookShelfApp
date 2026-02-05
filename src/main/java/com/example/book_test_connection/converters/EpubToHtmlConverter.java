@@ -30,10 +30,9 @@ public class EpubToHtmlConverter implements BookToHtmlConverter{
     private static final String CONTAINER_PATH = "META-INF/container.xml";
     private static final String DEFAULT_OPF_REL_PATH = "OEBPS/content.opf"; // fallback
     private static final int WORDS_PER_PAGE = 150;
-    private final BookRepository bookRepository;
 
-    EpubToHtmlConverter(BookRepository bookRepository){
-        this.bookRepository = bookRepository;
+    EpubToHtmlConverter(){
+
     }
 
     @Override
@@ -178,64 +177,6 @@ public class EpubToHtmlConverter implements BookToHtmlConverter{
         div.attr("style", baseStyle); // видима
 
         return div;
-    }
-
-    private void addStylesAndScript(Document doc) {
-        doc.head().append("""
-        <style>
-            body { margin: 0; background: #f9f9f9; }
-            .book-page { /* стили уже заданы через style="" */ }
-        </style>
-        <script>
-        (function() {
-            const pages = document.querySelectorAll('.book-page');
-            let totalPages = pages.length;
-            let currentPage = 1;
-
-            function showPage(pageNum) {
-                if (pageNum < 1) pageNum = 1;
-                if (pageNum > totalPages) pageNum = totalPages;
-
-                pages.forEach((el, i) => {
-                    el.style.display = (i === pageNum - 1) ? 'block' : 'none';
-                });
-                currentPage = pageNum;
-                sendProgress(currentPage, totalPages);
-            }
-
-            function sendProgress(page, total) {
-                const token = localStorage.getItem('jwtToken');
-                if (!token) {
-                    console.warn('No token found. User not authenticated.');
-                    return;
-                }
-                fetch('/bookShelf/api/books/PROGRESS_ID/progress', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({\s
-                        pageNumber: page
-                    })
-                }).catch(err => console.warn('Progress send failed:', err));
-            }
-
-            // Обработка URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const pageParam = parseInt(urlParams.get('page'), 10);
-            if (!isNaN(pageParam) && pageParam > 0) {
-                showPage(pageParam);
-            }
-
-            // Стрелки
-            document.addEventListener('keydown', e => {
-                if (e.key === 'ArrowRight') showPage(currentPage + 1);
-                if (e.key === 'ArrowLeft')  showPage(currentPage - 1);
-            });
-        })();
-        </script>
-    """);
     }
 
     // === Вспомогательные методы (без изменений) ===

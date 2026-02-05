@@ -1,5 +1,6 @@
 package com.example.book_test_connection.service;
 
+import com.example.book_test_connection.exceptions.CaptchaException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,7 +17,7 @@ public class CaptchaService {
 
     public void verify(String responseToken) {
         if (responseToken == null || responseToken.isEmpty()) {
-            throw new RuntimeException("Captcha response is required");
+            throw new CaptchaException("Captcha response is required");
         }
 
         RestTemplate restTemplate = new RestTemplate();
@@ -24,7 +25,7 @@ public class CaptchaService {
         Map<String, Object> response = restTemplate.postForObject(url, null, Map.class);
 
         if (response == null || !(Boolean) response.get("success")) {
-            throw new RuntimeException("Captcha verification failed");
+            throw new CaptchaException("Captcha verification failed");
         }
     }
 }

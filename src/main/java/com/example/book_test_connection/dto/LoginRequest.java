@@ -1,6 +1,5 @@
 package com.example.book_test_connection.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 
@@ -15,7 +14,6 @@ public class LoginRequest {
     public String getPassword() {
         return password;
     }
-    // геттеры
 }
 
 

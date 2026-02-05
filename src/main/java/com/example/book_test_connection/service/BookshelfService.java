@@ -3,12 +3,11 @@ package com.example.book_test_connection.service;
 import com.example.book_test_connection.entity.Bookshelf;
 import com.example.book_test_connection.entity.User;
 import com.example.book_test_connection.exceptions.BookNotFoundException;
+import com.example.book_test_connection.exceptions.NotEnoughRightsException;
+import com.example.book_test_connection.exceptions.ShelfNotFoundException;
 import com.example.book_test_connection.repository.BookRepository;
 import com.example.book_test_connection.repository.BookshelfRepository;
 import com.example.book_test_connection.repository.UserRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,11 +54,11 @@ public class BookshelfService {
         }
 
         Bookshelf shelf = bookshelfRepository.findById(shelfId)
-                .orElseThrow(() -> new RuntimeException("Bookshelf not found"));
+                .orElseThrow(() -> new ShelfNotFoundException("Bookshelf not found"));
 
         // Проверка владения
         if (!shelf.getUser().getId().equals(currentUserId)) {
-            throw new RuntimeException("You do not own this bookshelf");
+            throw new NotEnoughRightsException("You do not own this bookshelf");
         }
         shelf.addBook(bookRepository.findBookById(bookId));
         bookshelfRepository.save(shelf);
@@ -67,10 +66,10 @@ public class BookshelfService {
 
     public void removeBookFromShelf(Long shelfId, Long bookId, Long currentUserId) {
         Bookshelf shelf = bookshelfRepository.findById(shelfId)
-                .orElseThrow(() -> new RuntimeException("Bookshelf not found"));
+                .orElseThrow(() -> new ShelfNotFoundException("Bookshelf not found"));
 
         if (!shelf.getUser().getId().equals(currentUserId)) {
-            throw new RuntimeException("You do not own this bookshelf");
+            throw new NotEnoughRightsException("You do not own this bookshelf");
         }
 
         // Проверяем наличие книги по ID
@@ -78,7 +77,7 @@ public class BookshelfService {
                 .anyMatch(book -> book.getId().equals(bookId));
 
         if (!bookExistsInShelf) {
-            throw new RuntimeException("Book is not in this bookshelf");
+            throw new BookNotFoundException("Book with " + bookId + " id is not in this bookshelf");
         }
         // Удаляем по ID
         shelf.getBooks().removeIf(book -> book.getId().equals(bookId));
@@ -87,10 +86,10 @@ public class BookshelfService {
 
     public void deleteBookshelf(Long shelfId, Long currentUserId) {
         Bookshelf shelf = bookshelfRepository.findById(shelfId)
-                .orElseThrow(() -> new RuntimeException("Bookshelf not found"));
+                .orElseThrow(() -> new BookNotFoundException("Bookshelf not found"));
 
         if (!shelf.getUser().getId().equals(currentUserId)) {
-            throw new RuntimeException("You do not own this bookshelf");
+            throw new NotEnoughRightsException("You do not own this bookshelf");
         }
         bookshelfRepository.delete(shelf);
     }

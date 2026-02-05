@@ -1,5 +1,8 @@
 package com.example.book_test_connection.exceptions;
 
+import com.example.book_test_connection.service.HtmlConversionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -8,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     //если пароль или почта неправильная
     @ExceptionHandler(BadCredentialsException.class)
@@ -54,6 +59,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UploadErrorException.class)
     public ResponseEntity<String> handleUploadErrorException(UploadErrorException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(NotEnoughRightsException.class)
+    public ResponseEntity<String> handleNotEnoughRights(NotEnoughRightsException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UnableFormatException.class)
+    public ResponseEntity<String> handleUnableFormatException(UnableFormatException ex) {
+        log.warn("Не найден конвертер: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CaptchaException.class)
+    public ResponseEntity<String> handleCaptchaException(CaptchaException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ShelfNotFoundException.class)
+    public ResponseEntity<String> handleShelfNotFoundException(ShelfNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST) //FORBIDDEN
                 .body(ex.getMessage());
     }
