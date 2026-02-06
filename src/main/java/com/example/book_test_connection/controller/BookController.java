@@ -171,11 +171,6 @@ public class BookController {
                     .body("Failed to read HTML file");
         }
 
-        // 4. Подставляем реальный ID для отправки прогресса
-        // Ищем заглушку и заменяем её
-//        html = html.replace("/bookShelf/api/books/PROGRESS_ID/progress",
-//                "/bookShelf/api/books/" + id + "/progress");
-
         // 5. Отдаём как HTML
         return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_HTML)

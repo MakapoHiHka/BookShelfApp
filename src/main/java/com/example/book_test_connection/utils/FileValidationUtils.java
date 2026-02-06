@@ -8,7 +8,7 @@ public class FileValidationUtils {
 
     // Разрешённые расширения (в нижнем регистре)
     private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<>(
-            Arrays.asList("epub")
+            Arrays.asList("epub") //добавить расширение сюда, если добавлен новый конвертер
     );
 
     public static boolean hasAllowedExtension(MultipartFile file) {

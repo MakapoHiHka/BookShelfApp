@@ -11,6 +11,3 @@ public class BookTestConnectionApplication {
 		SpringApplication.run(BookTestConnectionApplication.class, args);
 	}
 }
-//при обновлении прогресса чтении книги узнает айди пользователя по bearer токену
-
-

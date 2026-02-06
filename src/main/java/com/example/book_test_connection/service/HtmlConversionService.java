@@ -18,6 +18,10 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+//при добавлении нового конвертора в пакет converters, тут трогать
+//ничего не надо, они сами собирутсься
+//нужно только добавить расширение в package com.example.book_test_connection.utils.FileValidationUtils
+
 @Service
 public class HtmlConversionService {
 
