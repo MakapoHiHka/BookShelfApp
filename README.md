@@ -38,7 +38,7 @@
 2. Настройте параметры в application.properties:  
   - Подключение к БД  
   - Ключи reCAPTCHA (также нужен ваш sitekey в register.html)  
-  - Данные Hogmail (для email)  
+  - Данные MailHog (для email)  
 
 3. Соберите и запустите
 
